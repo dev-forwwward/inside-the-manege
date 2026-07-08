@@ -1,0 +1,79 @@
+name: Purge jsDelivr Cache
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "js/**"
+      - "css/**"
+      - "**.html"
+  workflow_dispatch: {} # manual run = purge every JS/CSS/HTML file
+
+# Don't let rapid pushes run overlapping purges against the same ref.
+concurrency:
+  group: purge-jsdelivr-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  # Opt JS-based actions (e.g. checkout) into Node 24 ahead of GitHub's
+  # June 2026 migration. Purely optional — has no effect on the bash steps.
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
+jobs:
+  purge:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Full history so we can diff against the commit the push started from,
+          # even when a push contains multiple commits.
+          fetch-depth: 0
+
+      - name: Determine changed files
+        id: changed
+        run: |
+          empty_tree="$(git hash-object -t tree /dev/null)"
+          after="${{ github.sha }}"
+          before="${{ github.event.before }}"
+
+          # Compare against the empty tree (i.e. purge everything) on a manual run,
+          # the first push to the branch, or whenever the previous commit isn't
+          # reachable (e.g. a force-push). Otherwise diff against the push base.
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] \
+             || [ -z "$before" ] \
+             || ! git cat-file -e "${before}^{commit}" 2>/dev/null; then
+            base="$empty_tree"
+          else
+            base="$before"
+          fi
+
+          # --diff-filter=d drops deleted files (no point purging what's gone).
+          files="$(git diff --name-only --diff-filter=d "$base" "$after" \
+                   | grep -E '\.(js|css|html)$' || true)"
+
+          {
+            echo "files<<EOF"
+            echo "$files"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Purge jsDelivr cache
+        if: steps.changed.outputs.files != ''
+        env:
+          FILES: ${{ steps.changed.outputs.files }}
+          REPO: ${{ github.repository }}
+          BRANCH: main
+        run: |
+          failed=0
+          while IFS= read -r file; do
+            [ -z "$file" ] && continue
+            url="https://purge.jsdelivr.net/gh/${REPO}@${BRANCH}/${file}"
+            printf 'Purging %s ... ' "$file"
+            if curl -fsS "$url" >/dev/null; then
+              echo "OK"
+            else
+              echo "FAILED"
+              failed=1
+            fi
+          done <<< "$FILES"
+          exit "$failed"
