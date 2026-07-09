@@ -12,6 +12,7 @@ export function navBarMenu() {
     // Hide initially with class
     //mobileMenu.classList.add('is-hidden');
 
+    if (trigger) {
     trigger.addEventListener("click", function (event) {
         event.stopPropagation();
 
@@ -79,6 +80,7 @@ export function navBarMenu() {
                 }, "<");
         }
     });
+    }
 
 
 
