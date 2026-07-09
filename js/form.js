@@ -1,7 +1,7 @@
 export function form() {
 
     // Form validation
-    if (document.querySelector('.section_contact_form')) {
+    if (document.querySelector('.newsletter_form-block')) {
         $("form").each(function (e) {
             $.validator.addMethod("letters", function (value, element) {
                 return this.optional(element) || value == value.match(/^[a-zA-Z\s]*$/);
@@ -57,22 +57,6 @@ export function form() {
             });
         });
     }
-
-    // Radio Button
-    document.querySelectorAll('.s_cfo_radio_elm').forEach((input) => {
-        input.addEventListener('change', () => {
-            // Remove selected class from all s_cfo_radio elements
-            document.querySelectorAll('.s_cfo_radio').forEach((radio) => {
-                radio.classList.remove('selected');
-            });
-
-            // Add selected class to the parent .s_cfo_radio of the checked input
-            const parent = input.closest('.s_cfo_radio');
-            if (parent) {
-                parent.classList.add('selected');
-            }
-        });
-    });
 
     console.log("Loading form()");
 }
