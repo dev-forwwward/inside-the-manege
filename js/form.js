@@ -12,6 +12,12 @@ export function form() {
                 );
             });
 
+            const errorIcon = `
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none">
+                ...
+                </svg>
+            `;
+
             // Disable native HTML5 validation
             $(this).attr('novalidate', 'novalidate');
             $(this).validate({
@@ -23,12 +29,15 @@ export function form() {
                         required: true,
                         email: true,
                         customEmail: true, // Add the customEmail validation
+                    },
+                    consent: {
+                        required: true
                     }
                 },
                 messages: {
-                    youremail:
-                        "Invalid email",
-                    yourname: "Invalid name"
+                    youremail: `${errorIcon} Invalid email`,
+                    yourname: "Invalid name",
+                    consent: `${errorIcon} You must agree before joining`
                 },
                 errorPlacement: function (error, element) {
                     // Find the field wrapper using jQuery
