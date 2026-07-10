@@ -37,9 +37,9 @@ export function form() {
                     }
                 },
                 messages: {
-                    youremail: `${errorIcon} Invalid email`,
+                    youremail: `${errorIcon} Please enter a valid email address.`,
                     yourname: "Invalid name",
-                    consent: `${errorIcon} You must agree before joining`
+                    consent: `${errorIcon} You must agree to receive updates and to the Privacy Policy.`
                 },
                 errorPlacement: function (error, element) {
                     // Find the field wrapper using jQuery
