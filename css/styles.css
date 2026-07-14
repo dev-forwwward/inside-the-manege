@@ -12,3 +12,18 @@
     background-color: var(--color-scheme-1--text-selection);
     color: white;
 }
+
+
+
+input::placeholder,
+textarea::placeholder {
+  font-family: 'Inter Tight', sans-serif;
+  font-weight: 400; /* match the weight you're actually using */
+}
+
+/* Safari sometimes still needs the -webkit prefix too */
+input::-webkit-input-placeholder,
+textarea::-webkit-input-placeholder {
+  font-family: 'Inter Tight', sans-serif;
+  font-weight: 400;
+}
