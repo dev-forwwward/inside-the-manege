@@ -241,7 +241,7 @@ export function navBarMenu() {
 
     const handleScroll = () => {
         const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-        const isOpen = menuNavBar.classList.contains("w--open");
+        const isOpen = menuNavBar ? menuNavBar.classList.contains("w--open") : false;
 
         if (!isOpen) {
             if (scrollTop > lastScrollTop && scrollTop > 10) {
