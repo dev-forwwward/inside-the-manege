@@ -43,7 +43,7 @@ export function form() {
                 },
                 errorPlacement: function (error, element) {
                     // Find the field wrapper using jQuery
-                    const fieldWrapper = element.closest('.form8_field-wrapper');
+                    const fieldWrapper = element.closest('.row-wrapper');
 
                     if (fieldWrapper.length) {
                         // Find the existing label-error-wrapper

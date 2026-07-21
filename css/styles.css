@@ -13,6 +13,11 @@
     color: black;
 }
 
+.w-input:focus, 
+.w-select:focus {
+    outline: 0;
+    border: 0 !important;
+}
 
 
 input::placeholder,
