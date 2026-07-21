@@ -4,13 +4,13 @@
 
 /* Text selection highlight */
 ::selection {
-    background-color: var(--color-scheme-1--text-selection);
-    color: white;
+    background-color: white;
+    color: black;
 }
 
 ::-moz-selection {
-    background-color: var(--color-scheme-1--text-selection);
-    color: white;
+    background-color: white;
+    color: black;
 }
 
 
