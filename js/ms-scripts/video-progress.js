@@ -72,7 +72,22 @@ async function fetchAllRecords(ms, table, memberId) {
     return all;
 }
 
+// Memberstack's own script needs a moment after page load to hydrate the session from cookies —
+// calling getCurrentMember() before that resolves can return null even for a logged-in member.
+// Mirrors the waitForMemberstack() guard in the Favorites page's MemberScript #186.
+function waitForMemberstackReady() {
+    return new Promise((resolve) => {
+        if (window.$memberstackDom && window.$memberstackReady) {
+            resolve();
+        } else {
+            document.addEventListener('memberstack.ready', resolve, { once: true });
+            setTimeout(resolve, 2000);
+        }
+    });
+}
+
 async function getMember(ms) {
+    await waitForMemberstackReady();
     const res = await ms.getCurrentMember();
     return res && res.data ? res.data : null;
 }
