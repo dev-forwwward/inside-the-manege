@@ -37,6 +37,13 @@ function escapeHtml(str) {
         .replace(/'/g, '&#39;');
 }
 
+function formatDuration(totalSeconds) {
+    const seconds = Math.max(0, Math.round(totalSeconds || 0));
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${String(secs).padStart(2, '0')}`;
+}
+
 function vimeoIdFromUrl(url) {
     return /player\.vimeo\.com\/video\/\d+/.test(url || '') ? true : false;
 }
@@ -228,11 +235,13 @@ export async function renderContinueWatching() {
         <a href="${escapeHtml(r.data.courseslug)}?lesson=${encodeURIComponent(r.data.lessonname)}" class="continue-watching-card">
             <div class="continue-watching-thumb-wrap">
                 <img src="${escapeHtml(r.data.thumbnail)}" alt="${escapeHtml(r.data.coursename)}">
+                <span class="video-duration-badge">${formatDuration(r.data.duration)}</span>
                 <div class="video-progress-track" style="display:block">
                     <div class="video-progress-fill" style="width:${Math.min(r.data.percent, 100)}%"></div>
                 </div>
             </div>
-            <p>${escapeHtml(r.data.coursename)} — ${escapeHtml(r.data.lessonname)}</p>
+            <p class="continue-watching-title">${escapeHtml(r.data.lessonname)}</p>
+            <p class="continue-watching-subtitle">${escapeHtml(r.data.coursename)}</p>
         </a>
     `).join('');
 
@@ -262,8 +271,10 @@ export async function renderSavedLessons() {
         const href = escapeHtml(courseSlug || '#') + (name ? `?lesson=${encodeURIComponent(name)}` : '');
         return `
             <a href="${href}" class="saved-lesson-card">
-                <img src="${escapeHtml(thumb || '')}" alt="${escapeHtml(name || '')}">
-                <p>${escapeHtml(name || 'Saved lesson')}</p>
+                <div class="continue-watching-thumb-wrap">
+                    <img src="${escapeHtml(thumb || '')}" alt="${escapeHtml(name || '')}">
+                </div>
+                <p class="continue-watching-title">${escapeHtml(name || 'Saved lesson')}</p>
             </a>
         `;
     }).join('');
