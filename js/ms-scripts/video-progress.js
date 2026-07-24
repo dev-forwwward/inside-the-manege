@@ -7,6 +7,10 @@
 //             completed (BOOLEAN) lastWatchedAt (DATE)
 //   Access:   create MEMBERS_ONLY, read/update/delete MEMBER_OWNER — same shape as `favorites`.
 //
+// Memberstack lowercases a field's Key regardless of the Name typed in when creating it (e.g.
+// "lessonKey" -> key "lessonkey"), so every property written/read below uses the lowercase key,
+// not the camelCase name shown in the dashboard.
+//
 // Lesson-level saves ("My List" for individual videos) reuse the existing `favorites` table
 // instead of a second table — see the save button markup in course.lessons.js.
 
@@ -107,16 +111,16 @@ export async function videoProgressTracker() {
 
         const item = document.querySelector(`.videos-scroll .video-item[data-video="${CSS.escape(currentKey)}"]`);
         const payload = {
-            lessonKey: currentKey,
-            courseSlug: window.location.pathname,
-            courseName: $('#course-title').text().trim(),
-            lessonName: item ? item.querySelector('.video-name div:last-child')?.textContent.trim() : '',
+            lessonkey: currentKey,
+            courseslug: window.location.pathname,
+            coursename: $('#course-title').text().trim(),
+            lessonname: item ? item.querySelector('.video-name div:last-child')?.textContent.trim() : '',
             thumbnail: $('.summary-img').attr('src') || '',
             seconds: Math.round(seconds || 0),
             duration: Math.round(duration || 0),
             percent: duration ? Math.round(fraction * 100) : 0,
             completed: fraction >= COMPLETE_THRESHOLD,
-            lastWatchedAt: new Date().toISOString(),
+            lastwatchedat: new Date().toISOString(),
         };
 
         const existing = progressByKey[currentKey];
@@ -166,7 +170,7 @@ export async function videoProgressTracker() {
     });
 
     const records = await fetchAllRecords(ms, PROGRESS_TABLE, member.id);
-    records.forEach((r) => { progressByKey[r.data.lessonKey] = r; });
+    records.forEach((r) => { progressByKey[r.data.lessonkey] = r; });
     paintLessonProgress();
 
     // If a lesson is already active on load (e.g. ?lesson= query param), attach to it too.
@@ -191,20 +195,20 @@ export async function renderContinueWatching() {
 
     const records = (await fetchAllRecords(ms, PROGRESS_TABLE, member.id))
         .filter((r) => !r.data.completed)
-        .sort((a, b) => new Date(b.data.lastWatchedAt) - new Date(a.data.lastWatchedAt))
+        .sort((a, b) => new Date(b.data.lastwatchedat) - new Date(a.data.lastwatchedat))
         .slice(0, 10);
 
     if (!records.length) { section.remove(); return; }
 
     shelf.innerHTML = records.map((r) => `
-        <a href="${escapeHtml(r.data.courseSlug)}?lesson=${encodeURIComponent(r.data.lessonName)}" class="continue-watching-card">
+        <a href="${escapeHtml(r.data.courseslug)}?lesson=${encodeURIComponent(r.data.lessonname)}" class="continue-watching-card">
             <div class="continue-watching-thumb-wrap">
-                <img src="${escapeHtml(r.data.thumbnail)}" alt="${escapeHtml(r.data.courseName)}">
+                <img src="${escapeHtml(r.data.thumbnail)}" alt="${escapeHtml(r.data.coursename)}">
                 <div class="video-progress-track" style="display:block">
                     <div class="video-progress-fill" style="width:${Math.min(r.data.percent, 100)}%"></div>
                 </div>
             </div>
-            <p>${escapeHtml(r.data.courseName)} — ${escapeHtml(r.data.lessonName)}</p>
+            <p>${escapeHtml(r.data.coursename)} — ${escapeHtml(r.data.lessonname)}</p>
         </a>
     `).join('');
 
