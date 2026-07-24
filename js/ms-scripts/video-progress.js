@@ -233,7 +233,8 @@ export async function renderSavedLessons() {
     if (!records.length) { section.remove(); return; }
 
     shelf.innerHTML = records.map((r) => {
-        const [name, courseSlug, thumb] = (r.data.item_name || '').split('|').map((s) => (s || '').trim());
+        // `favorites` has no `item_name` field — the display label lives in `item_member` instead.
+        const [name, courseSlug, thumb] = (r.data.item_member || '').split('|').map((s) => (s || '').trim());
         const href = escapeHtml(courseSlug || '#') + (name ? `?lesson=${encodeURIComponent(name)}` : '');
         return `
             <a href="${href}" class="saved-lesson-card">

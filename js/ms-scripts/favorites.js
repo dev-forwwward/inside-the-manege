@@ -126,7 +126,9 @@ export function favorites() {
                     b.classList.remove('is-saved');
                 });
             } else {
-                const data = { item_name: itemName, member: member.id };
+                // `favorites` table has no `item_name` field — its key is locked to `item_member`
+                // (created under that name before this field got repurposed for display labels).
+                const data = { item_member: itemName, member: member.id };
                 let res;
                 try { res = await ms.createDataRecord({ table: CONFIG.tableName, data: { ...data, item: itemId } }); }
                 catch (e) { res = await ms.createDataRecord({ table: CONFIG.tableName, data: { ...data, item: { id: itemId } } }); }
