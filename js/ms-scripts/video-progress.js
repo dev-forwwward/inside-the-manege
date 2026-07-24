@@ -56,14 +56,23 @@ function loadVimeoSdk() {
 }
 
 // Client API uses flat query (where/take/skip), not findMany — mirrors favorites.js.
-async function fetchAllRecords(ms, table, memberId) {
+//
+// `favorites` has a real `member` reference field, so filtering by it works. `video_progress`
+// has no such field — per its schema comment up top, ownership is enforced by the table's
+// MEMBER_OWNER read rule alone, and querying `where: { member: ... }` on it 400s with
+// "Unknown field: member". Pass filterByMember: false for tables without that field.
+async function fetchAllRecords(ms, table, memberId, { filterByMember = true } = {}) {
     const all = [];
     let skip = 0;
     let records;
     do {
         const page = await ms.queryDataRecords({
             table,
-            query: { where: { member: { equals: memberId } }, take: PAGE_SIZE, skip },
+            query: {
+                ...(filterByMember ? { where: { member: { equals: memberId } } } : {}),
+                take: PAGE_SIZE,
+                skip,
+            },
         });
         records = page.data?.records || [];
         all.push(...records);
@@ -184,7 +193,7 @@ export async function videoProgressTracker() {
         if (iframe) attachPlayer(iframe, e.detail.videoKey);
     });
 
-    const records = await fetchAllRecords(ms, PROGRESS_TABLE, member.id);
+    const records = await fetchAllRecords(ms, PROGRESS_TABLE, member.id, { filterByMember: false });
     records.forEach((r) => { progressByKey[r.data.lessonkey] = r; });
     paintLessonProgress();
 
@@ -208,7 +217,7 @@ export async function renderContinueWatching() {
     const member = await getMember(ms);
     if (!member) { section.remove(); return; }
 
-    const records = (await fetchAllRecords(ms, PROGRESS_TABLE, member.id))
+    const records = (await fetchAllRecords(ms, PROGRESS_TABLE, member.id, { filterByMember: false }))
         .filter((r) => !r.data.completed)
         .sort((a, b) => new Date(b.data.lastwatchedat) - new Date(a.data.lastwatchedat))
         .slice(0, 10);
