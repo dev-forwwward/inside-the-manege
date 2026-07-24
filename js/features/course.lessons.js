@@ -1,5 +1,10 @@
 import { addCurrentLessonToWatches } from '../ms-scripts/course-progress.js';
 
+// Escapes text dropped into an HTML attribute inside a template-literal string (video URLs/titles aren't otherwise sanitized before this).
+function escapeAttr(str) {
+    return String(str ?? '').replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+}
+
 export function courseLessons() {
 
     $(document).ready(function(){
@@ -8,6 +13,11 @@ export function courseLessons() {
         let group_id = 0;
         let currentGroup = [];
         let group_titles = [];
+
+        // Denormalized onto every lesson row's save button so favorites.js (unmodified) can
+        // bookmark individual lessons in the same `favorites` table used for whole-course saves.
+        const courseSlug = window.location.pathname;
+        const courseThumbnail = $('.summary-img').attr('src') || '';
 
         $('.rich-groups-videos > *').each(function(){
 
@@ -69,15 +79,26 @@ export function courseLessons() {
                 let duration = video_item[2];
 
                 let url = encodeURI(name);
+                let lessonKey = video.trim();
+                // `item_name`'s pipe-delimited encoding mirrors this file's own rich-text lesson
+                // format — the `favorites` table has no dedicated columns for a lesson's course
+                // link/thumbnail, so the shelf on the Favorites page splits this back apart.
+                let itemName = `${name} | ${courseSlug} | ${courseThumbnail}`;
 
 
                 videos_html +=
 
-                    `<div class="video-item" data-lesson="${url}" data-video="${video.trim()}">
+                    `<div class="video-item" data-lesson="${url}" data-video="${escapeAttr(lessonKey)}">
                         <div class="video-name">
                             <img src="https://assets.website-files.com/635559e58d9051b6e2d9ae12/635ab0284ef7ab0eaae31fb7_5e41e923b6863614638cdd3b_course-lesson-white.svg" loading="lazy" alt="" class="play-icon" />
                             <div>${name}</div>
                         </div>
+                        <div class="video-progress-track" data-progress-track style="display:none">
+                            <div class="video-progress-fill" data-progress-fill></div>
+                        </div>
+                        <button type="button" class="video-save-btn favorite_button" data-favorite-button data-item-id="${escapeAttr(lessonKey)}" data-item-name="${escapeAttr(itemName)}" aria-label="Save lesson" onclick="event.stopPropagation()">
+                            <svg class="favorite_icon video-save-icon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M6 2h12a1 1 0 0 1 1 1v18l-7-4-7 4V3a1 1 0 0 1 1-1z" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
+                        </button>
                         <div class="video-duration"><div>${duration}</div></div>
                     </div>`;
                 ;
@@ -126,7 +147,11 @@ export function courseLessons() {
         $(this).addClass("active");
 
         // SHOW VIDEO OF EPISODE
-        $(".video-lesson iframe").attr("src", $(this).attr("data-video"));
+        let activeVideoKey = $(this).attr("data-video");
+        $(".video-lesson iframe").attr("src", activeVideoKey);
+
+        // Lets video-progress.js (re)attach a Vimeo Player instance to the swapped iframe.
+        document.dispatchEvent(new CustomEvent("lesson:changed", { detail: { videoKey: activeVideoKey } }));
 
 
         // CHANGE URL

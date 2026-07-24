@@ -1,3 +1,78 @@
 .favorite_button.is-saved .favorite_icon {
   fill: var(--ms215-saved-color, #c96442);
 }
+
+/* Per-lesson save button injected into .video-item rows by course.lessons.js */
+.video-save-btn {
+  background: none;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.6);
+  line-height: 0;
+}
+
+.video-save-btn.is-saved .video-save-icon {
+  color: var(--ms215-saved-color, #c96442);
+}
+
+.video-save-icon path {
+  fill: inherit;
+}
+
+.video-save-btn.is-saved .video-save-icon path {
+  fill: var(--ms215-saved-color, #c96442);
+  stroke: var(--ms215-saved-color, #c96442);
+}
+
+/* Progress bar injected into .video-item rows and the Continue Watching shelf */
+.video-progress-track {
+  position: relative;
+  width: 100%;
+  height: 3px;
+  background: rgba(0, 0, 0, 0.35);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.video-progress-fill {
+  height: 100%;
+  width: 0%;
+  background: var(--ms215-saved-color, #c96442);
+}
+
+/* Continue Watching / Saved Lessons shelves on the Favorites page */
+.continue-watching-card,
+.saved-lesson-card {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+
+.continue-watching-thumb-wrap {
+  position: relative;
+}
+
+.continue-watching-thumb-wrap img,
+.saved-lesson-card img {
+  width: 100%;
+  display: block;
+}
+
+.continue-watching-thumb-wrap .video-progress-track {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+}
+
+.continue-watching_shelf,
+.saved-lessons_shelf {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.continue-watching_shelf .continue-watching-card,
+.saved-lessons_shelf .saved-lesson-card {
+  width: 220px;
+}
