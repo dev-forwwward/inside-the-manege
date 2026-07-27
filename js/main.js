@@ -37,7 +37,7 @@ export function mainInit() {
         duration: .5,
         ease: "power2.out",
         onComplete: ()=> {
-            document.querySelector('.preloader').remove();
+            document.querySelector('.preloader')?.remove();
         }
     });
 

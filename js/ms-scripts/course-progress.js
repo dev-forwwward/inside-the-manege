@@ -25,20 +25,14 @@ export async function courseProgress() {
     $(".progress-bar-inside").css("width", `${complete}%`);
 
 
-    let title = $("#course-title").text();
-    let arr = json.data[title];
-
-    if ( arr.length ) {
+    if ( currentLessons.length ) {
         $(".video-item").each(function(){
             let v = $(this).attr("data-video");
-            if ( arr.includes(v) ) {
+            if ( currentLessons.includes(v) ) {
                 $(this).find(".play-icon").attr("src", "https://uploads-ssl.webflow.com/635559e58d9051b6e2d9ae12/63609bfb701e5fb42287ac3a_check-circle-fill.svg");
             }
         });
     }
-
-
-    console.log( "json", json.data[title] );
 
 }
 
