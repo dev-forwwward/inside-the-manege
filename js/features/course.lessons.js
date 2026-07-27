@@ -1,8 +1,15 @@
 import { addCurrentLessonToWatches } from '../ms-scripts/course-progress.js';
 
-// Escapes text dropped into an HTML attribute inside a template-literal string (video URLs/titles aren't otherwise sanitized before this).
-function escapeAttr(str) {
-    return String(str ?? '').replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+// Escapes text dropped into innerHTML via a template-literal string — lesson/group titles and
+// durations come from CMS rich text, which isn't otherwise sanitized before this, so a crafted
+// title could break out of its tag (stored HTML injection) without this.
+function escapeHtml(str) {
+    return String(str ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
 }
 
 export function courseLessons() {
@@ -88,18 +95,18 @@ export function courseLessons() {
 
                 videos_html +=
 
-                    `<div class="video-item" data-lesson="${url}" data-video="${escapeAttr(lessonKey)}">
+                    `<div class="video-item" data-lesson="${escapeHtml(url)}" data-video="${escapeHtml(lessonKey)}">
                         <div class="video-name">
                             <img src="https://assets.website-files.com/635559e58d9051b6e2d9ae12/635ab0284ef7ab0eaae31fb7_5e41e923b6863614638cdd3b_course-lesson-white.svg" loading="lazy" alt="" class="play-icon" />
-                            <div>${name}</div>
+                            <div>${escapeHtml(name)}</div>
                         </div>
                         <div class="video-progress-track" data-progress-track style="display:none">
                             <div class="video-progress-fill" data-progress-fill></div>
                         </div>
-                        <button type="button" class="video-save-btn favorite_button" data-favorite-button data-item-id="${escapeAttr(lessonKey)}" data-item-name="${escapeAttr(itemName)}" aria-label="Save lesson" onclick="event.stopPropagation()">
+                        <button type="button" class="video-save-btn favorite_button" data-favorite-button data-item-id="${escapeHtml(lessonKey)}" data-item-name="${escapeHtml(itemName)}" aria-label="Save lesson" onclick="event.stopPropagation()">
                             <svg class="favorite_icon video-save-icon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M6 2h12a1 1 0 0 1 1 1v18l-7-4-7 4V3a1 1 0 0 1 1-1z" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
                         </button>
-                        <div class="video-duration"><div>${duration}</div></div>
+                        <div class="video-duration"><div>${escapeHtml(duration)}</div></div>
                     </div>`;
                 ;
 
@@ -109,7 +116,7 @@ export function courseLessons() {
 
             group_html +=`
                 <div class="video-group">
-                    <div class="videos-group-title">${gname}</div>
+                    <div class="videos-group-title">${escapeHtml(gname)}</div>
                     <div class="video-items">
                        ${videos_html}
                     </div>
