@@ -48,6 +48,33 @@ function vimeoIdFromUrl(url) {
     return /player\.vimeo\.com\/video\/\d+/.test(url || '') ? true : false;
 }
 
+// Converts a player embed URL (player.vimeo.com/video/ID?h=HASH) into the vimeo.com/ID/HASH
+// form Vimeo's oEmbed endpoint expects — the ?h= hash is required for unlisted videos.
+function vimeoWatchUrlFromEmbed(url) {
+    const match = /player\.vimeo\.com\/video\/(\d+)(?:\?h=([a-f0-9]+))?/.exec(url || '');
+    if (!match) return null;
+    const [, id, hash] = match;
+    return hash ? `https://vimeo.com/${id}/${hash}` : `https://vimeo.com/${id}`;
+}
+
+// Per-lesson thumbnail cache (a still frame of that specific video, from Vimeo's oEmbed API) —
+// keyed by lessonKey so repeated saveProgress() calls for the same lesson don't refetch.
+const vimeoThumbnailCache = {};
+
+async function fetchVimeoThumbnail(key) {
+    if (key in vimeoThumbnailCache) return vimeoThumbnailCache[key];
+    const watchUrl = vimeoWatchUrlFromEmbed(key);
+    if (!watchUrl) { vimeoThumbnailCache[key] = ''; return ''; }
+    try {
+        const res = await fetch(`https://vimeo.com/api/oembed.json?url=${encodeURIComponent(watchUrl)}`);
+        const data = res.ok ? await res.json() : null;
+        vimeoThumbnailCache[key] = data?.thumbnail_url || '';
+    } catch (e) {
+        vimeoThumbnailCache[key] = '';
+    }
+    return vimeoThumbnailCache[key];
+}
+
 function loadVimeoSdk() {
     if (window.Vimeo) return Promise.resolve();
     if (!window.__vimeoSdkPromise) {
@@ -146,7 +173,9 @@ export async function videoProgressTracker() {
             courseslug: window.location.pathname,
             coursename: $('#course-title').text().trim(),
             lessonname: item ? item.querySelector('.video-name div:last-child')?.textContent.trim() : '',
-            thumbnail: $('.summary-img').attr('src') || '',
+            // A still of this specific video, not the course cover — falls back to the course
+            // image only if Vimeo's oEmbed lookup hasn't resolved yet or fails.
+            thumbnail: vimeoThumbnailCache[currentKey] || $('.summary-img').attr('src') || '',
             seconds: Math.round(seconds || 0),
             duration: Math.round(duration || 0),
             percent: duration ? Math.round(fraction * 100) : 0,
@@ -170,6 +199,8 @@ export async function videoProgressTracker() {
 
         // YouTube-embedded lessons: no Vimeo Player.js hook available, skip tracking silently.
         if (!vimeoIdFromUrl(key)) { player = null; return; }
+
+        fetchVimeoThumbnail(key); // warm the cache ahead of the first saveProgress() write
 
         await loadVimeoSdk();
         player = new Vimeo.Player(iframe);
