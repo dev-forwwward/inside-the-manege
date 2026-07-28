@@ -86,7 +86,12 @@ export function courseLessons() {
                 let duration = video_item[2];
 
                 let url = encodeURI(name);
-                let lessonKey = video.trim();
+                let videoUrl = video.trim();
+                // Prefixed with the course path because stock/demo lesson videos can be the exact
+                // same URL across two different courses — a bare video URL would let progress on
+                // one course's lesson collide with another's. data-video stays the raw playable
+                // URL (iframe src); data-lesson-key is what progress tracking and saves key off.
+                let lessonKey = `${courseSlug}::${videoUrl}`;
                 // `item_name`'s pipe-delimited encoding mirrors this file's own rich-text lesson
                 // format — the `favorites` table has no dedicated columns for a lesson's course
                 // link/thumbnail, so the shelf on the Favorites page splits this back apart.
@@ -95,7 +100,7 @@ export function courseLessons() {
 
                 videos_html +=
 
-                    `<div class="video-item" data-lesson="${escapeHtml(url)}" data-video="${escapeHtml(lessonKey)}">
+                    `<div class="video-item" data-lesson="${escapeHtml(url)}" data-video="${escapeHtml(videoUrl)}" data-lesson-key="${escapeHtml(lessonKey)}">
                         <div class="video-name">
                             <img src="https://assets.website-files.com/635559e58d9051b6e2d9ae12/635ab0284ef7ab0eaae31fb7_5e41e923b6863614638cdd3b_course-lesson-white.svg" loading="lazy" alt="" class="play-icon" />
                             <div>${escapeHtml(name)}</div>
@@ -154,11 +159,12 @@ export function courseLessons() {
         $(this).addClass("active");
 
         // SHOW VIDEO OF EPISODE
-        let activeVideoKey = $(this).attr("data-video");
-        $(".video-lesson iframe").attr("src", activeVideoKey);
+        let activeVideoUrl = $(this).attr("data-video");
+        let activeLessonKey = $(this).attr("data-lesson-key");
+        $(".video-lesson iframe").attr("src", activeVideoUrl);
 
         // Lets video-progress.js (re)attach a Vimeo Player instance to the swapped iframe.
-        document.dispatchEvent(new CustomEvent("lesson:changed", { detail: { videoKey: activeVideoKey } }));
+        document.dispatchEvent(new CustomEvent("lesson:changed", { detail: { videoUrl: activeVideoUrl, lessonKey: activeLessonKey } }));
 
 
         // CHANGE URL

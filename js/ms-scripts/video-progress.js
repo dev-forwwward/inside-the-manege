@@ -1,6 +1,8 @@
 // Memberstack Data Table: video_progress — per-member Vimeo watch position/percent, keyed by
-// lesson embed URL. Create this table by hand in the Memberstack dashboard (Data Tables aren't
-// reachable from the client API used here):
+// `${courseSlug}::${videoUrl}` (see data-lesson-key in course.lessons.js) rather than the bare
+// video URL, since stock/demo lesson videos can be the exact same URL across two different
+// courses. Create this table by hand in the Memberstack dashboard (Data Tables aren't reachable
+// from the client API used here):
 //
 //   Fields:   lessonKey (TEXT, required) courseSlug (TEXT) courseName (TEXT) lessonName (TEXT)
 //             thumbnail (TEXT) seconds (NUMBER) duration (NUMBER) percent (NUMBER)
@@ -148,13 +150,14 @@ export async function videoProgressTracker() {
 
     let progressByKey = {};
     let player = null;
-    let currentKey = null;
+    let currentVideoUrl = null;
+    let currentLessonKey = null;
     let lastWriteTime = 0;
     let lastWrittenPercent = -1;
 
     function paintLessonProgress() {
         document.querySelectorAll('.videos-scroll .video-item').forEach((item) => {
-            const key = item.getAttribute('data-video');
+            const key = item.getAttribute('data-lesson-key');
             const record = progressByKey[key];
             const track = item.querySelector('[data-progress-track]');
             const fill = item.querySelector('[data-progress-fill]');
@@ -165,17 +168,17 @@ export async function videoProgressTracker() {
     }
 
     async function saveProgress(seconds, duration, fraction) {
-        if (!currentKey) return;
+        if (!currentLessonKey) return;
 
-        const item = document.querySelector(`.videos-scroll .video-item[data-video="${CSS.escape(currentKey)}"]`);
+        const item = document.querySelector(`.videos-scroll .video-item[data-lesson-key="${CSS.escape(currentLessonKey)}"]`);
         const payload = {
-            lessonkey: currentKey,
+            lessonkey: currentLessonKey,
             courseslug: window.location.pathname,
             coursename: $('#course-title').text().trim(),
             lessonname: item ? item.querySelector('.video-name div:last-child')?.textContent.trim() : '',
             // A still of this specific video, not the course cover — falls back to the course
             // image only if Vimeo's oEmbed lookup hasn't resolved yet or fails.
-            thumbnail: vimeoThumbnailCache[currentKey] || $('.summary-img').attr('src') || '',
+            thumbnail: vimeoThumbnailCache[currentVideoUrl] || $('.summary-img').attr('src') || '',
             seconds: Math.round(seconds || 0),
             duration: Math.round(duration || 0),
             percent: duration ? Math.round(fraction * 100) : 0,
@@ -183,29 +186,30 @@ export async function videoProgressTracker() {
             lastwatchedat: new Date().toISOString(),
         };
 
-        const existing = progressByKey[currentKey];
+        const existing = progressByKey[currentLessonKey];
         if (existing) {
             await ms.updateDataRecord({ recordId: existing.id, data: payload });
-            progressByKey[currentKey] = { id: existing.id, data: payload };
+            progressByKey[currentLessonKey] = { id: existing.id, data: payload };
         } else {
             const created = await ms.createDataRecord({ table: PROGRESS_TABLE, data: payload });
-            progressByKey[currentKey] = { id: created.data.id, data: payload };
+            progressByKey[currentLessonKey] = { id: created.data.id, data: payload };
         }
         paintLessonProgress();
     }
 
-    async function attachPlayer(iframe, key) {
-        currentKey = key;
+    async function attachPlayer(iframe, videoUrl, lessonKey) {
+        currentVideoUrl = videoUrl;
+        currentLessonKey = lessonKey;
 
         // YouTube-embedded lessons: no Vimeo Player.js hook available, skip tracking silently.
-        if (!vimeoIdFromUrl(key)) { player = null; return; }
+        if (!vimeoIdFromUrl(videoUrl)) { player = null; return; }
 
-        fetchVimeoThumbnail(key); // warm the cache ahead of the first saveProgress() write
+        fetchVimeoThumbnail(videoUrl); // warm the cache ahead of the first saveProgress() write
 
         await loadVimeoSdk();
         player = new Vimeo.Player(iframe);
 
-        const existing = progressByKey[key];
+        const existing = progressByKey[lessonKey];
         if (existing && !existing.data.completed && existing.data.seconds > 5) {
             player.ready().then(() => player.setCurrentTime(existing.data.seconds).catch(() => {}));
         }
@@ -228,7 +232,7 @@ export async function videoProgressTracker() {
 
     document.addEventListener('lesson:changed', (e) => {
         const iframe = wrapper.querySelector('iframe');
-        if (iframe) attachPlayer(iframe, e.detail.videoKey);
+        if (iframe) attachPlayer(iframe, e.detail.videoUrl, e.detail.lessonKey);
     });
 
     const records = await fetchAllRecords(ms, PROGRESS_TABLE, member.id, { filterByMember: false });
@@ -239,7 +243,7 @@ export async function videoProgressTracker() {
     const activeItem = document.querySelector('.videos-scroll .video-item.active');
     const iframe = wrapper.querySelector('iframe');
     if (activeItem && iframe && iframe.getAttribute('src')) {
-        attachPlayer(iframe, activeItem.getAttribute('data-video'));
+        attachPlayer(iframe, activeItem.getAttribute('data-video'), activeItem.getAttribute('data-lesson-key'));
     }
 
     console.log('Loading videoProgressTracker');
