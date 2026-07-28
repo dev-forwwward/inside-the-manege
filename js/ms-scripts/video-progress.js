@@ -12,32 +12,11 @@
 // Memberstack lowercases a field's Key regardless of the Name typed in when creating it (e.g.
 // "lessonKey" -> key "lessonkey"), so every property written/read below uses the lowercase key,
 // not the camelCase name shown in the dashboard.
-//
-// Lesson-level saves ("My List" for individual videos) reuse the existing `favorites` table
-// instead of a second table — see the save button markup in course.lessons.js.
 
 const PROGRESS_TABLE = 'video_progress';
-const FAVORITES_TABLE = 'favorites';
 const WRITE_INTERVAL_MS = 15000; // stays well under the Data Table write rate limit
 const COMPLETE_THRESHOLD = 0.97;
 const PAGE_SIZE = 100;
-
-// Course-item favorite records use a Webflow Mongo ObjectId as `item`; lesson records use the
-// lesson's embed URL — this tells the two apart without a dedicated schema field.
-const isCourseCmsId = (value) => /^[0-9a-f]{24}$/i.test(value || '');
-
-// Data Table records are member-writable (a member could hit the Memberstack API directly), so
-// course/lesson names and thumbnail URLs get escaped before landing in innerHTML — same trust
-// boundary as any other member-supplied field, even though today's values only ever originate
-// from CMS content.
-function escapeHtml(str) {
-    return String(str ?? '')
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;');
-}
 
 function formatDuration(totalSeconds) {
     const seconds = Math.max(0, Math.round(totalSeconds || 0));
@@ -249,11 +228,15 @@ export async function videoProgressTracker() {
     console.log('Loading videoProgressTracker');
 }
 
-// ON FAVORITES PAGE: in-progress (not completed) lessons, most recently watched first.
+// ON FAVORITES PAGE: in-progress (not completed) lessons, most recently watched first. The card
+// markup is a real Designer-built element (data-cw-template, hidden via the cw-template-hidden
+// class) inside #continue-watching-shelf — this clones and populates it rather than building an
+// HTML string, so the card's look lives entirely in Webflow, not in this file.
 export async function renderContinueWatching() {
     const section = document.querySelector('[data-continue-watching-section]');
     const shelf = document.getElementById('continue-watching-shelf');
-    if (!section || !shelf) return;
+    const template = shelf?.querySelector('[data-cw-template]');
+    if (!section || !shelf || !template) return;
 
     const ms = window.$memberstackDom;
     const member = await getMember(ms);
@@ -264,55 +247,34 @@ export async function renderContinueWatching() {
         .sort((a, b) => new Date(b.data.lastwatchedat) - new Date(a.data.lastwatchedat))
         .slice(0, 10);
 
+    shelf.querySelectorAll('[data-cw-clone]').forEach((el) => el.remove());
+
     if (!records.length) { section.remove(); return; }
 
-    shelf.innerHTML = records.map((r) => `
-        <a href="${escapeHtml(r.data.courseslug)}?lesson=${encodeURIComponent(r.data.lessonname)}" class="continue-watching-card">
-            <div class="continue-watching-thumb-wrap">
-                <img src="${escapeHtml(r.data.thumbnail)}" alt="${escapeHtml(r.data.coursename)}">
-                <span class="video-duration-badge">${formatDuration(r.data.duration)}</span>
-                <div class="video-progress-track" style="display:block">
-                    <div class="video-progress-fill" style="width:${Math.min(r.data.percent, 100)}%"></div>
-                </div>
-            </div>
-            <p class="continue-watching-title">${escapeHtml(r.data.lessonname)}</p>
-            <p class="continue-watching-subtitle">${escapeHtml(r.data.coursename)}</p>
-        </a>
-    `).join('');
+    records.forEach((r) => {
+        const card = template.cloneNode(true);
+        card.removeAttribute('data-cw-template');
+        card.setAttribute('data-cw-clone', '');
+        card.classList.remove('cw-template-hidden');
+        card.href = `${r.data.courseslug}?lesson=${encodeURIComponent(r.data.lessonname)}`;
 
-    console.log('Loading renderContinueWatching');
-}
+        const img = card.querySelector('[data-cw-img]');
+        if (img) { img.src = r.data.thumbnail; img.alt = r.data.coursename; }
 
-// ON FAVORITES PAGE: individually saved (bookmarked) lessons, from the shared favorites table.
-export async function renderSavedLessons() {
-    const section = document.querySelector('[data-saved-lessons-section]');
-    const shelf = document.getElementById('saved-lessons-shelf');
-    if (!section || !shelf) return;
+        const duration = card.querySelector('[data-cw-duration]');
+        if (duration) duration.textContent = formatDuration(r.data.duration);
 
-    const ms = window.$memberstackDom;
-    const member = await getMember(ms);
-    if (!member) { section.remove(); return; }
+        const fill = card.querySelector('[data-progress-fill]');
+        if (fill) fill.style.width = Math.min(r.data.percent, 100) + '%';
 
-    const records = (await fetchAllRecords(ms, FAVORITES_TABLE, member.id)).filter((r) => {
-        const item = (r.data.item && r.data.item.id) || r.data.item;
-        return item && !isCourseCmsId(item);
+        const title = card.querySelector('[data-cw-title]');
+        if (title) title.textContent = r.data.lessonname;
+
+        const subtitle = card.querySelector('[data-cw-subtitle]');
+        if (subtitle) subtitle.textContent = r.data.coursename;
+
+        shelf.appendChild(card);
     });
 
-    if (!records.length) { section.remove(); return; }
-
-    shelf.innerHTML = records.map((r) => {
-        // `favorites` has no `item_name` field — the display label lives in `item_member` instead.
-        const [name, courseSlug, thumb] = (r.data.item_member || '').split('|').map((s) => (s || '').trim());
-        const href = escapeHtml(courseSlug || '#') + (name ? `?lesson=${encodeURIComponent(name)}` : '');
-        return `
-            <a href="${href}" class="saved-lesson-card">
-                <div class="continue-watching-thumb-wrap">
-                    <img src="${escapeHtml(thumb || '')}" alt="${escapeHtml(name || '')}">
-                </div>
-                <p class="continue-watching-title">${escapeHtml(name || 'Saved lesson')}</p>
-            </a>
-        `;
-    }).join('');
-
-    console.log('Loading renderSavedLessons');
+    console.log('Loading renderContinueWatching');
 }

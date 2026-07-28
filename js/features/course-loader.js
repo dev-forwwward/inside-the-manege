@@ -9,7 +9,7 @@ const [
     { courseLessons },
     { courseProgress },
     { favorites },
-    { videoProgressTracker, renderContinueWatching, renderSavedLessons },
+    { videoProgressTracker, renderContinueWatching },
 ] = await Promise.all([
     import(`./course.lessons.js?v=${v}`),
     import(`../ms-scripts/course-progress.js?v=${v}`),
@@ -22,6 +22,5 @@ courseProgress();
 favorites();
 videoProgressTracker();
 renderContinueWatching();
-renderSavedLessons();
 
 console.log("Loading course-loader");

@@ -21,10 +21,8 @@ export function courseLessons() {
         let currentGroup = [];
         let group_titles = [];
 
-        // Denormalized onto every lesson row's save button so favorites.js (unmodified) can
-        // bookmark individual lessons in the same `favorites` table used for whole-course saves.
+        // Prefixed onto each lesson's progress-tracking key — see lessonKey below.
         const courseSlug = window.location.pathname;
-        const courseThumbnail = $('.summary-img').attr('src') || '';
 
         $('.rich-groups-videos > *').each(function(){
 
@@ -92,10 +90,6 @@ export function courseLessons() {
                 // one course's lesson collide with another's. data-video stays the raw playable
                 // URL (iframe src); data-lesson-key is what progress tracking and saves key off.
                 let lessonKey = `${courseSlug}::${videoUrl}`;
-                // `item_name`'s pipe-delimited encoding mirrors this file's own rich-text lesson
-                // format — the `favorites` table has no dedicated columns for a lesson's course
-                // link/thumbnail, so the shelf on the Favorites page splits this back apart.
-                let itemName = `${name} | ${courseSlug} | ${courseThumbnail}`;
 
 
                 videos_html +=
@@ -108,9 +102,6 @@ export function courseLessons() {
                         <div class="video-progress-track" data-progress-track style="display:none">
                             <div class="video-progress-fill" data-progress-fill></div>
                         </div>
-                        <button type="button" class="video-save-btn favorite_button" data-favorite-button data-item-id="${escapeHtml(lessonKey)}" data-item-name="${escapeHtml(itemName)}" aria-label="Save lesson" onclick="event.stopPropagation()">
-                            <svg class="favorite_icon video-save-icon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M6 2h12a1 1 0 0 1 1 1v18l-7-4-7 4V3a1 1 0 0 1 1-1z" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
-                        </button>
                         <div class="video-duration"><div>${escapeHtml(duration)}</div></div>
                     </div>`;
                 ;
