@@ -1,0 +1,19 @@
+[    1016ms] [ERROR] Error: <svg> attribute height: Expected length, "auto". @ https://fwd-inside-the-manege-offer-tst.webflow.io/plans:569
+[    1016ms] [ERROR] Error: <svg> attribute height: Expected length, "auto". @ https://fwd-inside-the-manege-offer-tst.webflow.io/plans:572
+[    1016ms] [ERROR] Error: <svg> attribute height: Expected length, "auto". @ https://fwd-inside-the-manege-offer-tst.webflow.io/plans:575
+[    1066ms] [VERBOSE] [DOM] Input elements should have autocomplete attributes (suggested: "current-password"): (More info: https://goo.gl/9p2vKq) %o @ https://fwd-inside-the-manege-offer-tst.webflow.io/plans:0
+[    1128ms] [LOG] Loading mainInit() @ https://cdn.jsdelivr.net/gh/dev-forwwward/inside-the-manege@feature/offers-tst/js/main.js?v=1785576091560:57
+[    1128ms] [WARNING] navComponent not found. @ https://cdn.jsdelivr.net/gh/dev-forwwward/inside-the-manege@feature/offers-tst/js/menu.js?v=1785576091560:237
+[    1128ms] [LOG] running swiper.js @ https://cdn.jsdelivr.net/gh/dev-forwwward/inside-the-manege@feature/offers-tst/js/swiper.js?v=1785576091560:2
+[    1128ms] [LOG] running swiperInit() @ https://cdn.jsdelivr.net/gh/dev-forwwward/inside-the-manege@feature/offers-tst/js/swiper.js?v=1785576091560:64
+[    1128ms] [LOG] Loading form() @ https://cdn.jsdelivr.net/gh/dev-forwwward/inside-the-manege@feature/offers-tst/js/form.js?v=1785576091560:71
+[    1128ms] [LOG] Loading footerDate() @ https://cdn.jsdelivr.net/gh/dev-forwwward/inside-the-manege@feature/offers-tst/js/footer-date.js?v=1785576091560:10
+[    1128ms] [LOG] Loading main scripts loader @ https://cdn.jsdelivr.net/gh/dev-forwwward/inside-the-manege@feature/offers-tst/js/script-loader.js?v=1785576091536:29
+[    1173ms] [LOG] Loading courseLessons() @ https://cdn.jsdelivr.net/gh/dev-forwwward/inside-the-manege@feature/offers-tst/js/features/course.lessons.js?v=1785576091561:225
+[    1174ms] [LOG] Loading course-loader @ https://cdn.jsdelivr.net/gh/dev-forwwward/inside-the-manege@feature/offers-tst/js/features/course-loader.js?v=1785576091536:25
+[    2342ms] [LOG] %cprice-update found color: green @ https://static.memberstack.com/scripts/v2/prebuilt-uis/v1.js:0
+[    2343ms] [LOG] %csignup-form found color: green @ https://static.memberstack.com/scripts/v2/prebuilt-uis/v1.js:0
+[    2343ms] [LOG] %cmember-data found color: green @ https://static.memberstack.com/scripts/v2/prebuilt-uis/v1.js:0
+[    2343ms] [LOG] %cgoogle-login found color: green @ https://static.memberstack.com/scripts/v2/prebuilt-uis/v1.js:0
+[    2343ms] [LOG] %cgated-content found color: green @ https://static.memberstack.com/scripts/v2/prebuilt-uis/v1.js:0
+[    2768ms] [LOG] %cUnknown custom field key color: yellow @ https://static.memberstack.com/scripts/v2/prebuilt-uis/v1.js:0

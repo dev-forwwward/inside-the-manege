@@ -1,0 +1,79 @@
+- generic [ref=f8e3]:
+  - navigation [ref=f8e7]:
+    - generic [ref=f8e9]:
+      - generic [ref=f8e10]:
+        - link [ref=f8e11] [cursor=pointer]:
+          - /url: /home
+        - generic [ref=f8e29]:
+          - link "Library" [ref=f8e30] [cursor=pointer]:
+            - /url: /library
+          - link "My progress" [ref=f8e31] [cursor=pointer]:
+            - /url: /favorites
+      - link "Login" [ref=f8e34] [cursor=pointer]:
+        - /url: /log-in
+  - generic [ref=f8e37]:
+    - heading "Plans" [level=1] [ref=f8e38]
+    - paragraph [ref=f8e39]: Explore our plans.
+    - generic [ref=f8e40]:
+      - generic [ref=f8e41]:
+        - generic [ref=f8e42]:
+          - generic [ref=f8e43]:
+            - heading "Monthly" [level=2] [ref=f8e44]
+            - paragraph [ref=f8e46]: $20 / month
+          - generic [ref=f8e47]:
+            - paragraph [ref=f8e49]: One project
+            - paragraph [ref=f8e51]: Your dashboard
+            - paragraph [ref=f8e53]: One project
+            - paragraph [ref=f8e55]: One project
+            - paragraph [ref=f8e57]: One project
+        - link [ref=f8e58] [cursor=pointer]:
+          - /url: /sign-up
+          - paragraph [ref=f8e59]: Select
+      - generic [ref=f8e60]:
+        - generic [ref=f8e61]:
+          - generic [ref=f8e62]:
+            - heading "Quarter" [level=2] [ref=f8e63]
+            - paragraph [ref=f8e65]: $50 / quarter
+          - generic [ref=f8e66]:
+            - paragraph [ref=f8e68]: One project
+            - paragraph [ref=f8e70]: Your dashboard
+            - paragraph [ref=f8e72]: One project
+            - paragraph [ref=f8e74]: One project
+            - paragraph [ref=f8e76]: One project
+        - link [ref=f8e77] [cursor=pointer]:
+          - /url: /sign-up
+          - paragraph [ref=f8e78]: Select
+      - generic [ref=f8e79]:
+        - generic [ref=f8e80]:
+          - generic [ref=f8e81]:
+            - heading "Yearly" [level=2] [ref=f8e82]
+            - paragraph [ref=f8e84]: $180 / year
+          - generic [ref=f8e85]:
+            - paragraph [ref=f8e87]: Unlimited project
+            - paragraph [ref=f8e89]: Your dashboard
+            - paragraph [ref=f8e91]: Unlimited Components
+            - paragraph [ref=f8e93]: Advanced charts
+            - paragraph [ref=f8e95]: Chat support
+        - link [ref=f8e96] [cursor=pointer]:
+          - /url: /sign-up
+          - paragraph [ref=f8e97]: Select
+    - link "Continue" [ref=f8e98] [cursor=pointer]:
+      - /url: "#"
+  - contentinfo [ref=f8e100]:
+    - generic [ref=f8e103]:
+      - generic [ref=f8e105]:
+        - link [ref=f8e107] [cursor=pointer]:
+          - /url: /
+        - generic [ref=f8e125]:
+          - link "Instagram" [ref=f8e126] [cursor=pointer]:
+            - /url: "#"
+          - link "Facebook" [ref=f8e131] [cursor=pointer]:
+            - /url: "#"
+          - link "Youtube" [ref=f8e136] [cursor=pointer]:
+            - /url: "#"
+      - generic [ref=f8e143]:
+        - generic [ref=f8e144]: © year Inside the Manège. All rights reserved.
+        - list [ref=f8e147]:
+          - listitem [ref=f8e148]:
+            - link "Privacy Policy" [ref=f8e149] [cursor=pointer]:
+              - /url: /legal/privacy-policy
