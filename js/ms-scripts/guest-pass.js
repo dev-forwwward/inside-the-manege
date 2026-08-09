@@ -32,6 +32,15 @@ const REDEEM_PATH = '/redeem-trial'; // the original /redeem was renamed to /red
 // direct client-side write.
 const REDEMPTION_WEBHOOK_URL = 'https://hook.us2.make.com/x7ypppupgx3k0vi61v6ueg8ctjp2qkyk';
 
+// Make Scenario A (email send) — TODO: replace with the real custom webhook URL once rebuilt.
+// The original design routed this through a hidden native Webflow form + Make's "Watch Events"
+// trigger, but Webflow's own form JS marks any form inside a display:none container as
+// permanently non-interactive (w-form-loading) at page load, before any submission is ever
+// attempted — confirmed live, zero executions ever reached Make regardless of how the submit was
+// triggered (click, requestSubmit, dispatched event). Calling a custom webhook directly, same
+// pattern as REDEMPTION_WEBHOOK_URL above, sidesteps Webflow's form system entirely.
+const INVITE_WEBHOOK_URL = 'https://hook.us2.make.com/nkbmtcwm7oo7idshyhl6h77x1cz5ppd2';
+
 function generateToken() {
     if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
 
@@ -188,6 +197,18 @@ function renderTable(records) {
         });
 }
 
+async function postInvite(recipientEmail, link) {
+    try {
+        await fetch(INVITE_WEBHOOK_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ recipientEmail, link }),
+        });
+    } catch (e) {
+        console.error('guest pass invite webhook failed', e);
+    }
+}
+
 function wireEmailInvite(ms, getUnclaimed, onClaimed) {
     const form = document.querySelector('[data-guestpass-email-form]');
     const emailInput = document.querySelector('[data-guestpass-email-input]');
@@ -199,11 +220,6 @@ function wireEmailInvite(ms, getUnclaimed, onClaimed) {
     // submit button's 'click' instead sidesteps Webflow's submit handling entirely — this form
     // was never meant to actually submit anywhere.
     const submitBtn = form && form.querySelector('input[type="submit"], button[type="submit"]');
-    // Separate native Webflow form — Make's "Watch Form Submissions" trigger sends the actual
-    // email. Kept apart from the JS-driven box above per docs/guest-pass-design.md.
-    const notifyForm = document.querySelector('[data-guestpass-notify-form]');
-    const notifyEmail = document.querySelector('[data-guestpass-notify-email]');
-    const notifyLink = document.querySelector('[data-guestpass-notify-link]');
     if (!form || !emailInput || !submitBtn) return;
 
     submitBtn.addEventListener('click', async (e) => {
@@ -224,15 +240,9 @@ function wireEmailInvite(ms, getUnclaimed, onClaimed) {
             data: { ...unclaimed.data, recipient_email: recipientEmail, status: 'sent', sent_date: sentDate },
         });
 
-        if (notifyForm && notifyEmail && notifyLink) {
-            notifyEmail.value = recipientEmail;
-            notifyLink.value = link;
-            // requestSubmit() triggers real native submit semantics (unlike a hand-rolled Event),
-            // so Webflow's own submit-interception JS on this hidden form reliably picks it up —
-            // that's what actually performs the AJAX POST Make's trigger watches for.
-            if (notifyForm.requestSubmit) notifyForm.requestSubmit();
-            else notifyForm.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
-        }
+        // Custom webhook + direct fetch, same pattern as postRedemption() — see the
+        // INVITE_WEBHOOK_URL comment for why this replaced the hidden-Webflow-form approach.
+        postInvite(recipientEmail, link);
 
         emailInput.value = '';
         onClaimed();
