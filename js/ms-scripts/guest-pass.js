@@ -32,9 +32,12 @@ const PASS_EXPIRY_DAYS = 365; // one-time grant, no refill
 const REDEMPTION_WEBHOOK_URL = 'https://hook.us2.make.com/x7ypppupgx3k0vi61v6ueg8ctjp2qkyk';
 
 function generateToken() {
-    return (window.crypto && crypto.randomUUID)
-        ? crypto.randomUUID()
-        : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+
+    // Fallback for browsers without randomUUID but with getRandomValues (broader support than
+    // randomUUID alone) — still cryptographically secure, unlike Math.random().
+    const bytes = crypto.getRandomValues(new Uint8Array(16));
+    return Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('');
 }
 
 function isoDaysFromNow(days) {
