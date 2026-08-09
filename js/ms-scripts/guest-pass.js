@@ -25,6 +25,7 @@ const ELIGIBLE_PLANS = {
     'pln_yearly-plan-r81z0g52': 3,
 };
 const PASS_EXPIRY_DAYS = 365; // one-time grant, no refill
+const REDEEM_PATH = '/redeem-trial'; // the original /redeem was renamed to /redeem-gift (Gift flow)
 
 // Make Scenario B ("guest-pass-redemption") — updates status: redeemed in both tables via the
 // Memberstack Admin API. See docs/guest-pass-design.md Decision #7 for why this can't be a
@@ -147,7 +148,7 @@ function renderPersonalLink(unclaimed) {
 
     if (box) box.style.display = '';
     if (empty) empty.style.display = 'none';
-    input.value = `${window.location.origin}/redeem?token=${unclaimed.data.token}`;
+    input.value = `${window.location.origin}${REDEEM_PATH}?token=${unclaimed.data.token}`;
 
     if (copyBtn && !copyBtn._guestpassWired) {
         copyBtn._guestpassWired = true;
@@ -206,7 +207,7 @@ function wireEmailInvite(ms, getUnclaimed, onClaimed) {
         if (!recipientEmail) return;
 
         const sentDate = new Date().toISOString();
-        const link = `${window.location.origin}/redeem?token=${unclaimed.data.token}`;
+        const link = `${window.location.origin}${REDEEM_PATH}?token=${unclaimed.data.token}`;
 
         // Row is written regardless of whether the Make send below actually succeeds — no
         // delivery-confirmation loop back into status for v1, per docs/guest-pass-design.md.
