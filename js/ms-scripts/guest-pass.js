@@ -191,14 +191,22 @@ function renderTable(records) {
 function wireEmailInvite(ms, getUnclaimed, onClaimed) {
     const form = document.querySelector('[data-guestpass-email-form]');
     const emailInput = document.querySelector('[data-guestpass-email-input]');
+    // The visible form is real .w-form markup, and Webflow's own site-wide JS already listens
+    // for its 'submit' event to run its own AJAX handling — that listener can stop the event
+    // from ever bubbling up to a listener on an ancestor wrapper (which is what
+    // data-guestpass-email-form actually resolves to, since it's on both the wrapper and the
+    // <form> tag and querySelector returns the first match in document order). Binding to the
+    // submit button's 'click' instead sidesteps Webflow's submit handling entirely — this form
+    // was never meant to actually submit anywhere.
+    const submitBtn = form && form.querySelector('input[type="submit"], button[type="submit"]');
     // Separate native Webflow form — Make's "Watch Form Submissions" trigger sends the actual
     // email. Kept apart from the JS-driven box above per docs/guest-pass-design.md.
     const notifyForm = document.querySelector('[data-guestpass-notify-form]');
     const notifyEmail = document.querySelector('[data-guestpass-notify-email]');
     const notifyLink = document.querySelector('[data-guestpass-notify-link]');
-    if (!form || !emailInput) return;
+    if (!form || !emailInput || !submitBtn) return;
 
-    form.addEventListener('submit', async (e) => {
+    submitBtn.addEventListener('click', async (e) => {
         e.preventDefault();
         const unclaimed = getUnclaimed();
         if (!unclaimed) return;
@@ -219,7 +227,11 @@ function wireEmailInvite(ms, getUnclaimed, onClaimed) {
         if (notifyForm && notifyEmail && notifyLink) {
             notifyEmail.value = recipientEmail;
             notifyLink.value = link;
-            notifyForm.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+            // requestSubmit() triggers real native submit semantics (unlike a hand-rolled Event),
+            // so Webflow's own submit-interception JS on this hidden form reliably picks it up —
+            // that's what actually performs the AJAX POST Make's trigger watches for.
+            if (notifyForm.requestSubmit) notifyForm.requestSubmit();
+            else notifyForm.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
         }
 
         emailInput.value = '';
