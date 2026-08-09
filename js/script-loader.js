@@ -9,6 +9,7 @@ const [
     { works },
     { form },
     { footerDate },
+    { faqs },
 ] = await Promise.all([
     import(`./main.js?v=${v}`),
     import(`./menu.js?v=${v}`),
@@ -16,9 +17,8 @@ const [
     import(`./works.js?v=${v}`),
     import(`./form.js?v=${v}`),
     import(`./footer-date.js?v=${v}`),
+    import(`./faqs.js?v=${v}`),
 ]);
-
-// not all script files are being loaded by default (example: faqs...)
 
 mainInit();
 navBarMenu();
@@ -26,5 +26,6 @@ swiperInit();
 works();
 form();
 footerDate();
+faqs();
 
 console.log("Loading main scripts loader");

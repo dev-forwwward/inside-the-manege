@@ -11,12 +11,14 @@ const [
     { favorites },
     { videoProgressTracker, renderContinueWatching },
     { planSelect },
+    { guestPass, guestPassRedeem },
 ] = await Promise.all([
     import(`./course.lessons.js?v=${v}`),
     import(`../ms-scripts/course-progress.js?v=${v}`),
     import(`../ms-scripts/favorites.js?v=${v}`),
     import(`../ms-scripts/video-progress.js?v=${v}`),
     import(`../ms-scripts/plan-select.js?v=${v}`),
+    import(`../ms-scripts/guest-pass.js?v=${v}`),
 ]);
 
 courseLessons();
@@ -25,5 +27,7 @@ favorites();
 videoProgressTracker();
 renderContinueWatching();
 planSelect();
+guestPass();
+guestPassRedeem();
 
 console.log("Loading course-loader");
