@@ -197,12 +197,18 @@ function renderTable(records) {
         });
 }
 
-async function postInvite(recipientEmail, link) {
+// token is included so Make can look up the guest_passes record itself and send using ITS OWN
+// stored recipient_email/token — never trusting recipientEmail/link directly from this payload.
+// Without that check, this webhook would be an open, unauthenticated relay: anyone who reads this
+// public JS could extract the URL and email arbitrary content to arbitrary addresses using this
+// site's Gmail identity. The Make side still needs a lookup+verify step mirroring
+// guest-pass-redemption's pattern before this is safe to leave running unattended.
+async function postInvite(token, recipientEmail, link) {
     try {
         await fetch(INVITE_WEBHOOK_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ recipientEmail, link }),
+            body: JSON.stringify({ token, recipientEmail, link }),
         });
     } catch (e) {
         console.error('guest pass invite webhook failed', e);
@@ -242,7 +248,7 @@ function wireEmailInvite(ms, getUnclaimed, onClaimed) {
 
         // Custom webhook + direct fetch, same pattern as postRedemption() — see the
         // INVITE_WEBHOOK_URL comment for why this replaced the hidden-Webflow-form approach.
-        postInvite(recipientEmail, link);
+        postInvite(unclaimed.data.token, recipientEmail, link);
 
         emailInput.value = '';
         onClaimed();
