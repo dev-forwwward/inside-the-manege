@@ -20,9 +20,9 @@ const PAGE_SIZE = 100;
 // Same pass count for every eligible tier (client confirmed) — kept as a map, not a bare number,
 // in case that ever changes to per-tier counts.
 const ELIGIBLE_PLANS = {
-    'pln_monthly-ny1u0g65': 3,
-    'pln_quarter-g4440ky3': 3,
-    'pln_yearly-plan-r81z0g52': 3,
+    'pln_plan-monthly-2c4l0n4j': 3,
+    'pln_plan-quarterly-ell10i4j': 3,
+    'pln_plan-annually-684o0nxj': 3,
 };
 const PASS_EXPIRY_DAYS = 365; // one-time grant, no refill
 const REDEEM_PATH = '/redeem-trial'; // the original /redeem was renamed to /redeem-gift (Gift flow)
@@ -315,7 +315,7 @@ async function watchForSignupSuccess(ms, onSuccess) {
 // PUBLIC read rule, no PII — Decision #8), then on signup success posts { token, newMemberId } to
 // Make's redemption webhook, which performs the actual status: redeemed write via the Memberstack
 // Admin API in both tables (client SDK can't do that write itself — Decision #7). The signup form
-// itself (Trial plan, pln_trial-zgug0auc — already configured with a 14-day card-required trial)
+// itself (Trial plan, pln_trial-lbl30i8w — already configured with a 14-day card-required trial)
 // still needs to exist on this page in Webflow; this only reacts to it, doesn't render it.
 export async function guestPassRedeem() {
     const container = document.querySelector('[data-guestpass-redeem]');

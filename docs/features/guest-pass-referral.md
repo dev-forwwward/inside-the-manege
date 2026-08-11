@@ -19,7 +19,7 @@ Runs if `[data-guestpass-link]`, `[data-guestpass-email-form]`, or `[data-guestp
 
 ### On the redeem page (`guestPassRedeem()`)
 
-Runs if `[data-guestpass-redeem]` is present. Reads `?token=` from the URL, looks it up in the public `guest_pass_lookup` table (anonymous read, no PII), and shows one of an invalid/expired/valid state. On a **logged-out → logged-in** transition happening on that same page load (i.e. the visitor signing up right there, via `ms.onAuthChange`), POSTs `{ token, newMemberId }` to a separate Make.com redemption webhook. An already-logged-in visitor opening someone else's invite is left unhandled on purpose — not the intended redemption flow. The actual signup form (Trial plan `pln_trial-zgug0auc`, 14-day card-required trial) must already exist on this page in Webflow; this script only reacts to it.
+Runs if `[data-guestpass-redeem]` is present. Reads `?token=` from the URL, looks it up in the public `guest_pass_lookup` table (anonymous read, no PII), and shows one of an invalid/expired/valid state. On a **logged-out → logged-in** transition happening on that same page load (i.e. the visitor signing up right there, via `ms.onAuthChange`), POSTs `{ token, newMemberId }` to a separate Make.com redemption webhook. An already-logged-in visitor opening someone else's invite is left unhandled on purpose — not the intended redemption flow. The actual signup form (Trial plan `pln_trial-lbl30i8w`, 14-day card-required trial) must already exist on this page in Webflow; this script only reacts to it.
 
 ## Why two webhooks and not direct client writes
 
