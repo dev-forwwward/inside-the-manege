@@ -13,13 +13,18 @@
 // documented in video-progress.js) — confirm actual keys in the dashboard before relying on the
 // ones used below.
 
-import {
+// Dynamic + cache-busted, not a static `import ... from`, same reason as every cross-file
+// reference in script-loader.js/course-loader.js: jsdelivr/browsers cache a plain static
+// specifier hard, with no way to force a fresh fetch — a stale cached copy of
+// memberstack-config.js (e.g. missing a newly added export) breaks this entire module's
+// top-level evaluation, which breaks every other module course-loader.js imports alongside it.
+const {
     GUEST_PASS_INVITE_WEBHOOK_URL,
     GUEST_PASS_INVITE_WEBHOOK_API_KEY,
     GUEST_PASS_REDEMPTION_WEBHOOK_URL,
     GUEST_PASS_REDEMPTION_WEBHOOK_API_KEY,
     GUEST_PASS_ELIGIBLE_PLANS,
-} from './memberstack-config.js';
+} = await import(`./memberstack-config.js?v=${Date.now()}`);
 
 const PASSES_TABLE = 'guest_passes';
 const LOOKUP_TABLE = 'guest_pass_lookup';
