@@ -13,33 +13,36 @@
 // documented in video-progress.js) — confirm actual keys in the dashboard before relying on the
 // ones used below.
 
+import {
+    GUEST_PASS_INVITE_WEBHOOK_URL,
+    GUEST_PASS_REDEMPTION_WEBHOOK_URL,
+    GUEST_PASS_REDEMPTION_WEBHOOK_API_KEY,
+    GUEST_PASS_ELIGIBLE_PLANS,
+} from './memberstack-config.js';
+
 const PASSES_TABLE = 'guest_passes';
 const LOOKUP_TABLE = 'guest_pass_lookup';
 const PAGE_SIZE = 100;
-
-// Same pass count for every eligible tier (client confirmed) — kept as a map, not a bare number,
-// in case that ever changes to per-tier counts.
-const ELIGIBLE_PLANS = {
-    'pln_plan-monthly-2c4l0n4j': 3,
-    'pln_plan-quarterly-ell10i4j': 3,
-    'pln_plan-annually-684o0nxj': 3,
-};
 const PASS_EXPIRY_DAYS = 365; // one-time grant, no refill
 const REDEEM_PATH = '/redeem-trial'; // the original /redeem was renamed to /redeem-gift (Gift flow)
 
 // Make Scenario B ("guest-pass-redemption") — updates status: redeemed in both tables via the
 // Memberstack Admin API. See docs/guest-pass-design.md Decision #7 for why this can't be a
 // direct client-side write.
-const REDEMPTION_WEBHOOK_URL = 'https://hook.us2.make.com/x7ypppupgx3k0vi61v6ueg8ctjp2qkyk';
+const REDEMPTION_WEBHOOK_URL = GUEST_PASS_REDEMPTION_WEBHOOK_URL;
+const REDEMPTION_WEBHOOK_API_KEY = GUEST_PASS_REDEMPTION_WEBHOOK_API_KEY;
 
-// Make Scenario A (email send) — TODO: replace with the real custom webhook URL once rebuilt.
-// The original design routed this through a hidden native Webflow form + Make's "Watch Events"
-// trigger, but Webflow's own form JS marks any form inside a display:none container as
-// permanently non-interactive (w-form-loading) at page load, before any submission is ever
-// attempted — confirmed live, zero executions ever reached Make regardless of how the submit was
-// triggered (click, requestSubmit, dispatched event). Calling a custom webhook directly, same
-// pattern as REDEMPTION_WEBHOOK_URL above, sidesteps Webflow's form system entirely.
-const INVITE_WEBHOOK_URL = 'https://hook.us2.make.com/nkbmtcwm7oo7idshyhl6h77x1cz5ppd2';
+// Make Scenario A (email send). The original design routed this through a hidden native Webflow
+// form + Make's "Watch Events" trigger, but Webflow's own form JS marks any form inside a
+// display:none container as permanently non-interactive (w-form-loading) at page load, before any
+// submission is ever attempted — confirmed live, zero executions ever reached Make regardless of
+// how the submit was triggered (click, requestSubmit, dispatched event). Calling a custom webhook
+// directly, same pattern as REDEMPTION_WEBHOOK_URL above, sidesteps Webflow's form system entirely.
+const INVITE_WEBHOOK_URL = GUEST_PASS_INVITE_WEBHOOK_URL;
+
+// Same pass count for every eligible tier (client confirmed) — kept as a map, not a bare number,
+// in case that ever changes to per-tier counts. IDs live in memberstack-config.js.
+const ELIGIBLE_PLANS = GUEST_PASS_ELIGIBLE_PLANS;
 
 function generateToken() {
     if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
@@ -288,7 +291,7 @@ async function postRedemption(token, newMemberId) {
     try {
         await fetch(REDEMPTION_WEBHOOK_URL, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json', 'x-make-apikey': REDEMPTION_WEBHOOK_API_KEY },
             body: JSON.stringify({ token, newMemberId }),
         });
     } catch (e) {
