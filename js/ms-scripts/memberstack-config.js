@@ -11,11 +11,12 @@
 export const GUEST_PASS_INVITE_WEBHOOK_URL = 'https://hook.us2.make.com/wn5rubicev15olao95oafw1as8gsfjt5';
 export const GUEST_PASS_REDEMPTION_WEBHOOK_URL = 'https://hook.us2.make.com/erkkgyqrkeiypaey23xapym895khmdp6';
 
-// Required by the redemption scenario's Webhooks module (API Key authentication) — a secret this
-// project invented, not issued by Webflow/Memberstack. Shipped in this public, CDN-served file,
-// so it's not a real security boundary — anyone can read it out of the source. It only blocks
-// casual/bot hits on the raw webhook URL; the actual protection is the server-side token
-// lookup+verify already in the Make scenario. The invite-email webhook has no key configured.
+// Required by each scenario's Webhooks module (API Key authentication) — secrets this project
+// invented, not issued by Webflow/Memberstack. Shipped in this public, CDN-served file, so
+// they're not a real security boundary — anyone can read them out of the source. They only block
+// casual/bot hits on the raw webhook URLs; the actual protection is the server-side token
+// lookup+verify already in each Make scenario.
+export const GUEST_PASS_INVITE_WEBHOOK_API_KEY = 'd72fb6129a22ffaef041b786d928cad7f286129eb8ec0dc436caaa1b99519e63';
 export const GUEST_PASS_REDEMPTION_WEBHOOK_API_KEY = '37b77c71fdfa194ae55d85542871e2702061c99e8008e3388626f144445b1c69';
 
 // Memberstack plan IDs eligible for guest passes, mapped to how many passes each grants. Value is

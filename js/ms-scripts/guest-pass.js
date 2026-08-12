@@ -15,6 +15,7 @@
 
 import {
     GUEST_PASS_INVITE_WEBHOOK_URL,
+    GUEST_PASS_INVITE_WEBHOOK_API_KEY,
     GUEST_PASS_REDEMPTION_WEBHOOK_URL,
     GUEST_PASS_REDEMPTION_WEBHOOK_API_KEY,
     GUEST_PASS_ELIGIBLE_PLANS,
@@ -204,13 +205,14 @@ function renderTable(records) {
 // stored recipient_email/token — never trusting recipientEmail/link directly from this payload.
 // Without that check, this webhook would be an open, unauthenticated relay: anyone who reads this
 // public JS could extract the URL and email arbitrary content to arbitrary addresses using this
-// site's Gmail identity. The Make side still needs a lookup+verify step mirroring
-// guest-pass-redemption's pattern before this is safe to leave running unattended.
+// site's Gmail identity. The Make side has this lookup+verify step in place (see
+// docs/features/make-scenarios.md) — the x-make-apikey header below is an additional layer on
+// top of it, not a replacement for it.
 async function postInvite(token, recipientEmail, link) {
     try {
         await fetch(INVITE_WEBHOOK_URL, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json', 'x-make-apikey': GUEST_PASS_INVITE_WEBHOOK_API_KEY },
             body: JSON.stringify({ token, recipientEmail, link }),
         });
     } catch (e) {
