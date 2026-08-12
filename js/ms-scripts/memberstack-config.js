@@ -17,7 +17,7 @@ export const GUEST_PASS_REDEMPTION_WEBHOOK_URL = 'https://hook.us2.make.com/erkk
 // casual/bot hits on the raw webhook URLs; the actual protection is the server-side token
 // lookup+verify already in each Make scenario.
 export const GUEST_PASS_INVITE_WEBHOOK_API_KEY = 'd72fb6129a22ffaef041b786d928cad7f286129eb8ec0dc436caaa1b99519e63';
-export const GUEST_PASS_REDEMPTION_WEBHOOK_API_KEY = '37b77c71fdfa194ae55d85542871e2702061c99e8008e3388626f144445b1c69';
+export const GUEST_PASS_REDEMPTION_WEBHOOK_API_KEY = 'c88a987c883aba733288071c170911dce3adf52c048051deecf64f1a0eb1b42e';
 
 // Memberstack plan IDs eligible for guest passes, mapped to how many passes each grants. Value is
 // a count, not a bare flag, in case per-tier counts ever differ (currently they don't — client
