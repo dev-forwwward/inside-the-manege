@@ -219,6 +219,7 @@ async function postInvite(token, recipientEmail, link) {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'x-make-apikey': GUEST_PASS_INVITE_WEBHOOK_API_KEY },
             body: JSON.stringify({ token, recipientEmail, link }),
+            keepalive: true,
         });
     } catch (e) {
         console.error('guest pass invite webhook failed', e);
@@ -296,10 +297,15 @@ export async function guestPass() {
 
 async function postRedemption(token, newMemberId) {
     try {
+        // keepalive: true — this fires right as Memberstack's post-signup redirect kicks in
+        // (checkout success -> course page), and a plain fetch() gets cancelled mid-flight by
+        // that navigation before it ever reaches Make. Confirmed live: without this flag, the
+        // webhook silently never arrived even though the rest of the flow worked end-to-end.
         await fetch(REDEMPTION_WEBHOOK_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'x-make-apikey': REDEMPTION_WEBHOOK_API_KEY },
             body: JSON.stringify({ token, newMemberId }),
+            keepalive: true,
         });
     } catch (e) {
         console.error('guest pass redemption webhook failed', e);
